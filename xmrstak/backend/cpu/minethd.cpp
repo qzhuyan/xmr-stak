@@ -314,7 +314,7 @@ std::vector<iBackend*> minethd::thread_starter(uint32_t threadOffset, miner_work
 		}
 		else
 			printer::inst()->print_msg(L1, "Starting %dx thread, no affinity.", cfg.iMultiway);
-		
+
 		minethd* thd = new minethd(pWork, i + threadOffset, cfg.iMultiway, cfg.bNoPrefetch, cfg.iCpuAff);
 		pvThreads.push_back(thd);
 	}
@@ -375,6 +375,8 @@ minethd::cn_hash_fun minethd::func_selector(bool bHaveAes, bool bNoPrefetch, boo
 
 void minethd::work_main()
 {
+  pthread_setname_np(pthread_self(), "william_worker");
+
 	if(affinity >= 0) //-1 means no affinity
 		bindMemoryToNUMANode(affinity);
 
@@ -397,7 +399,7 @@ void minethd::work_main()
 	piNonce = (uint32_t*)(oWork.bWorkBlob + 39);
 	globalStates::inst().inst().iConsumeCnt++;
 	result.iThreadId = iThreadNo;
-
+  pthread_setname_np(pthread_self(), "william_worker");
 	while (bQuit == 0)
 	{
 		if (oWork.bStall)
@@ -572,6 +574,8 @@ void minethd::multiway_work_main(cn_hash_fun_multi hash_fun_multi)
 	uint8_t bWorkBlob[sizeof(miner_work::bWorkBlob) * MAX_N];
 	uint32_t iNonce;
 	job_result res;
+
+  pthread_setname_np(pthread_self(), "william_worker");
 
 	for (size_t i = 0; i < N; i++)
 	{
